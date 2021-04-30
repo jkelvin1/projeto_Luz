@@ -8,6 +8,7 @@ using System.Windows.Input;
 using MySqlConnector;
 using CRUD_ProdFinanceiro.Connection;
 using CRUD_ProdFinanceiro.BDCRUD;
+using System.Windows.Controls;
 
 namespace CRUD_ProdFinanceiro.ViewModel
 {
@@ -38,7 +39,10 @@ namespace CRUD_ProdFinanceiro.ViewModel
 
             mysqlcrud = new MySqlCRUD();
             sqlitecrud = new SqLiteCRUD();
-            
+
+            mysqlcrud.ReadAll(ProdutoFinanceiro);
+
+
             this.MyCommands();
         }
 
@@ -55,18 +59,17 @@ namespace CRUD_ProdFinanceiro.ViewModel
         {
             if (Tipo == "Ação")
             {
-               opcaoTabela = "produto_acao";
-               ProdutoFinanceiro.Add(new AcaoModel(Sigla, Nome, Setor, Tipo));    
+                opcaoTabela = "produto_acao";
+                
             }
             else if (Tipo == "Fundo")
             {
                 opcaoTabela = "produto_fundo";
-                ProdutoFinanceiro.Add(new FundoModel(Sigla, Nome, Setor, Tipo));
             }
-            mysqlcrud.Create(Sigla, Nome, Setor, opcaoTabela);
-            //sqlitecrud.Create(Sigla, Nome, Setor, opcaoTabela);
+            mysqlcrud.Create(Sigla, Nome, Setor, opcaoTabela, ProdutoFinanceiro);
+            //sqlitecrud.Create(Sigla, Nome, Setor, opcaoTabela, ProdutoFinanceiro);
 
-
+            
         }
         public bool CreateProdutoFinanceiroCanUse(object objRelayCommand)
         {
@@ -75,7 +78,12 @@ namespace CRUD_ProdFinanceiro.ViewModel
 
         public void ReadProdutoFinanceiro(object objRelayCommand)
         {
-            
+            ProdutoFinanceiro.Clear();
+            mysqlcrud.Read(Sigla, ProdutoFinanceiro);
+            if(Sigla == "")
+            {
+                mysqlcrud.ReadAll(ProdutoFinanceiro);
+            }
         }
         public bool ReadProdutoFinanceiroCanUse(object objRelayCommand)
         {
@@ -85,7 +93,7 @@ namespace CRUD_ProdFinanceiro.ViewModel
         public void UpdateProdutoFinanceiro(object objRelayCommand)
         {
             IProdutoFinanceiro itemSelecionado = (IProdutoFinanceiro)objRelayCommand;
-
+            
             if (itemSelecionado.Tipo == "Ação")
             {
                 opcaoTabela = "produto_acao";
@@ -106,19 +114,18 @@ namespace CRUD_ProdFinanceiro.ViewModel
 
         public void DeleteProdutoFinanceiro(object objRelayCommand)
         {
-            ProdutoFinanceiro.Remove((IProdutoFinanceiro)objRelayCommand);
-
             IProdutoFinanceiro itemSelecionado = (IProdutoFinanceiro)objRelayCommand;
 
             if (itemSelecionado.Tipo == "Ação")
             {
                 opcaoTabela = "produto_acao";
             }
-            else if(itemSelecionado.Tipo == "Fundo")
+            else if (itemSelecionado.Tipo == "Fundo")
             {
                 opcaoTabela = "produto_fundo";
             }
-            mysqlcrud.Delete(itemSelecionado.Id, opcaoTabela);
+
+            mysqlcrud.Delete(itemSelecionado.Id, opcaoTabela, itemSelecionado, ProdutoFinanceiro);
         }
         public bool DeleteProdutoFinanceiroCanUse(object objRelayCommand)
         {

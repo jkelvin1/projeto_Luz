@@ -5,6 +5,8 @@ using System.Text;
 using System.Data;
 using System.Data.SQLite;
 using System.Windows;
+using CRUD_ProdFinanceiro.Interface;
+using CRUD_ProdFinanceiro.Model;
 
 namespace CRUD_ProdFinanceiro.BDCRUD
 {
@@ -19,8 +21,9 @@ namespace CRUD_ProdFinanceiro.BDCRUD
             sqlitecommand = new SQLiteCommand();        
         }
 
-        public void Create(string Sigla, string Nome, string Setor, string opcaoTabela)
+        public void Create(string Sigla, string Nome, string Setor, string opcaoTabela, ICollection<IProdutoFinanceiro> produtoFinanceiros)
         {
+            int Id;
             try
             {
                 using (sqlitecommand.Connection = (SQLiteConnection)dbconnection.AbrirConexao())
@@ -30,11 +33,27 @@ namespace CRUD_ProdFinanceiro.BDCRUD
                     sqlitecommand.Parameters.AddWithValue("@NOME", Nome);
                     sqlitecommand.Parameters.AddWithValue("@SETOR", Setor);
                     sqlitecommand.ExecuteNonQuery();
+                    Id = (int)sqlitecommand.Connection.LastInsertRowId; 
                 };
+                
+
+                if (opcaoTabela == "produto_acao")
+                {
+                    produtoFinanceiros.Add(new AcaoModel(Id, Sigla, Nome, Setor));
+
+                }
+                else if (opcaoTabela == "produto_fundo")
+                {
+                    produtoFinanceiros.Add(new FundoModel(Id, Sigla, Nome, Setor));
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                sqlitecommand.Connection.Dispose();
             }
         }
     

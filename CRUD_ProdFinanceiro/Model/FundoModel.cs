@@ -16,12 +16,13 @@ namespace CRUD_ProdFinanceiro.Model
         }
 
 
-        public FundoModel(string mdlSigla, string mdlNome, string mdlSetor, string mdlTipo)
+        public FundoModel(int mdlId, string mdlSigla, string mdlNome, string mdlSetor)
         {
+            Id = mdlId;
             Sigla = mdlSigla;
             Nome = mdlNome;
             Setor = mdlSetor;
-            Tipo = mdlTipo;
+            Tipo = "Fundo";
         }
 
         private int _id;

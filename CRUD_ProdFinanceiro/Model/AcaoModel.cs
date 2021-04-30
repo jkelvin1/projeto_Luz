@@ -17,12 +17,13 @@ namespace CRUD_ProdFinanceiro.Model
         }
 
 
-        public AcaoModel(string mdlSigla, string mdlNome, string mdlSetor, string mdlTipo)
+        public AcaoModel(int mdlId, string mdlSigla, string mdlNome, string mdlSetor)
         {
+            Id = mdlId;
             Sigla = mdlSigla;
             Nome = mdlNome;
             Setor = mdlSetor;
-            Tipo = mdlTipo;
+            Tipo = "Ação";
         }
 
         private int _id;

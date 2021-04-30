@@ -13,8 +13,8 @@
             <Button Content="Editar" Command="{Binding UpdateProdutoFinanceiroCommand}" CommandParameter="{Binding ElementName=lstProduto, Path=SelectedItem}"/>
             <Button Content="Deletar" Command="{Binding DeleteProdutoFinanceiroCommand}" CommandParameter="{Binding ElementName=lstProduto, Path=SelectedItem}"/>
         </TabPanel>
-        <StackPanel Width="250" Margin="240,10,77,50">
-            <ListView x:Name="lstProduto" ItemsSource="{Binding ProdutoFinanceiro}" SelectedItem="{Binding ItemSelecionado}">
+        <StackPanel Width="300" Margin="270,10,0,10">
+            <ListView x:Name="lstProduto" ItemsSource="{Binding ProdutoFinanceiro}">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="Sigla" DisplayMemberBinding="{Binding Sigla}"/>
