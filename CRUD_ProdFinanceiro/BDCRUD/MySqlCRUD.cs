@@ -13,7 +13,7 @@ namespace CRUD_ProdFinanceiro.BDCRUD
         private MySqlCommand mysqlComando;
         public MySqlCRUD()
         {
-            dbconnection = new DBConnection(new MySqlConnection("Server=localhost;Database=produto_financeiro;Uid=root;Pwd=vjGfkY2Ee5@8ReF;"));
+            dbconnection = new DBConnection(new MySqlConnection("Server=localhost;Database=produto_financeiro;Uid=root;Pwd=;"));
             mysqlComando = new MySqlCommand();
         }
 
