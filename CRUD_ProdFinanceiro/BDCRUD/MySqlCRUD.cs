@@ -4,10 +4,7 @@ using CRUD_ProdFinanceiro.Model;
 using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace CRUD_ProdFinanceiro.BDCRUD
 {
@@ -18,121 +15,59 @@ namespace CRUD_ProdFinanceiro.BDCRUD
         private MySqlDataReader mysqldatareader;
         public MySqlCRUD()
         {
-            dbconnection = new DBConnection(new MySqlConnection("Server=localhost;Database=produto_financeiro;Uid=root;Pwd=;"));
-            mysqlComando = new MySqlCommand();
+            this.dbconnection = new DBConnection(new MySqlConnection("Server=localhost;Database=produto_financeiro;Uid=root;Pwd=vjGfkY2Ee5@8ReF;"));
+            this.mysqlComando = new MySqlCommand();
         }
 
-        public void Create(string Sigla, string Nome, string Setor, string opcaoTabela, ICollection<IProdutoFinanceiro> produtoFinanceiros)
+        public int Create(string Sigla, string Nome, string Setor, string opcaoTabela)
         {
-            mysqlComando.Parameters.Clear();
-            mysqlComando.CommandText = "INSERT INTO " + opcaoTabela + " (SIGLA, NOME, SETOR) VALUES (@SIGLA, @NOME, @SETOR)";
-  
-            mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
-            mysqlComando.Parameters.AddWithValue("@NOME", Nome);
-            mysqlComando.Parameters.AddWithValue("@SETOR", Setor);  
+            this.mysqlComando.Parameters.Clear();
+            this.mysqlComando.CommandText = "INSERT INTO " + opcaoTabela + " (SIGLA, NOME, SETOR) VALUES (@SIGLA, @NOME, @SETOR)";
+
+            this.mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
+            this.mysqlComando.Parameters.AddWithValue("@NOME", Nome);
+            this.mysqlComando.Parameters.AddWithValue("@SETOR", Setor);
 
             try
             {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqlComando.ExecuteNonQuery();
+                this.mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
+                this.mysqlComando.ExecuteNonQuery();
 
                 int Id = (int)mysqlComando.LastInsertedId;
-
-                if (opcaoTabela == "produto_acao")
-                {
-                    produtoFinanceiros.Add(new AcaoModel(Id,Sigla,Nome,Setor));
-                    
-                }
-                else if (opcaoTabela == "produto_fundo")
-                {
-                    produtoFinanceiros.Add(new FundoModel(Id, Sigla, Nome, Setor));
-                }
-
+                return Id;
             }
             catch (Exception ex)
             {
 
                 MessageBox.Show(ex.Message);
+                return 0;
             }
             finally
             {
-                dbconnection.FecharConexao();
+                this.dbconnection.FecharConexao();
             }
         }
 
         public void Read(string Sigla, ICollection<IProdutoFinanceiro> produtoFinanceiro)
         {
-            mysqlComando.Parameters.Clear();
-            mysqlComando.CommandText = "SELECT * FROM produto_acao WHERE SIGLA = @SIGLA";
-            
-
-            mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
-
-            try
-            {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqldatareader = mysqlComando.ExecuteReader();
-
-
-                while (mysqldatareader.Read())
-                {
-                    produtoFinanceiro.Add(new AcaoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
-
-                }
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                dbconnection.FecharConexao();
-            }
-
-            mysqlComando.Parameters.Clear();
-            mysqlComando.CommandText = "SELECT * FROM produto_fundo WHERE SIGLA = @SIGLA";
-
-
-            mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
-
-            try
-            {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqldatareader = mysqlComando.ExecuteReader();
-
-
-                while (mysqldatareader.Read())
-                {
-                    produtoFinanceiro.Add(new FundoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
-
-                }
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                dbconnection.FecharConexao();
-            }
+            ReadAcao(Sigla, produtoFinanceiro);
+            ReadFundo(Sigla, produtoFinanceiro);
         }
 
         public void Update(int Id, string Sigla, string Nome, string Setor, string opcaoTabela)
         {
-            mysqlComando.Parameters.Clear();
-            mysqlComando.CommandText = "UPDATE " + opcaoTabela + " SET SIGLA = @SIGLA, NOME = @NOME, SETOR = @SETOR WHERE ID = @ID";
+            this.mysqlComando.Parameters.Clear();
+            this.mysqlComando.CommandText = "UPDATE " + opcaoTabela + " SET SIGLA = @SIGLA, NOME = @NOME, SETOR = @SETOR WHERE ID = @ID";
 
-            mysqlComando.Parameters.AddWithValue("@ID", Id);
-            mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
-            mysqlComando.Parameters.AddWithValue("@NOME", Nome);
-            mysqlComando.Parameters.AddWithValue("@SETOR", Setor);
+            this.mysqlComando.Parameters.AddWithValue("@ID", Id);
+            this.mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
+            this.mysqlComando.Parameters.AddWithValue("@NOME", Nome);
+            this.mysqlComando.Parameters.AddWithValue("@SETOR", Setor);
 
             try
             {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqlComando.ExecuteNonQuery();
+                this.mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
+                this.mysqlComando.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
@@ -145,80 +80,105 @@ namespace CRUD_ProdFinanceiro.BDCRUD
             }
         }
 
-        public void Delete(int Id, string opcaoTabela, IProdutoFinanceiro itemSelecionado, ICollection<IProdutoFinanceiro> produtoFinanceiro)
+        public bool Delete(int Id, string opcaoTabela)
         {
-            mysqlComando.Parameters.Clear();
-            mysqlComando.CommandText = "DELETE FROM "+opcaoTabela+" WHERE ID = @ID";
+            this.mysqlComando.Parameters.Clear();
+            this.mysqlComando.CommandText = "DELETE FROM " + opcaoTabela + " WHERE ID = @ID";
 
-            mysqlComando.Parameters.AddWithValue("@ID", Id);
+            this.mysqlComando.Parameters.AddWithValue("@ID", Id);
 
             try
             {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqlComando.ExecuteNonQuery();
-                produtoFinanceiro.Remove(itemSelecionado);
+                this.mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
+                this.mysqlComando.ExecuteNonQuery();
+                return true;
             }
             catch (Exception ex)
             {
 
                 MessageBox.Show(ex.Message);
+                return false;
             }
             finally
             {
-                dbconnection.FecharConexao();
+                this.dbconnection.FecharConexao();
             }
         }
 
         public void ReadAll(ICollection<IProdutoFinanceiro> produtoFinanceiro)
         {
-            mysqlComando.Parameters.Clear();
-            mysqlComando.CommandText = "SELECT * FROM produto_acao";
+            ReadAllAcao(produtoFinanceiro);
+            ReadAllFundo(produtoFinanceiro);
+        }
+
+        private void ReadAllAcao(ICollection<IProdutoFinanceiro> produtoFinanceiro)
+        {
+            this.mysqldatareader = Select("produto_acao");
+            while (this.mysqldatareader.Read())
+            {
+                produtoFinanceiro.Add(new AcaoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
+
+            }
+            this.dbconnection.FecharConexao();
+        }
+
+        private void ReadAllFundo(ICollection<IProdutoFinanceiro> produtoFinanceiro)
+        {
+            this.mysqldatareader = Select("produto_fundo");
+            while (this.mysqldatareader.Read())
+            {
+                produtoFinanceiro.Add(new FundoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
+
+            }
+            this.dbconnection.FecharConexao();
+        }
+
+        private void ReadAcao(string Sigla, ICollection<IProdutoFinanceiro> produtoFinanceiro)
+        {
+            this.mysqldatareader = Select("produto_acao", Sigla);
+            while (this.mysqldatareader.Read())
+            {
+                produtoFinanceiro.Add(new AcaoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
+
+            }
+            this.dbconnection.FecharConexao();
+        }
+
+        private void ReadFundo(string Sigla, ICollection<IProdutoFinanceiro> produtoFinanceiro)
+        {
+            this.mysqldatareader = Select("produto_fundo", Sigla);
+            while (this.mysqldatareader.Read())
+            {
+                produtoFinanceiro.Add(new FundoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
+
+            }
+            this.dbconnection.FecharConexao();
+
+        }
+
+        private MySqlDataReader Select(string tabela, string Sigla = null)
+        {
+            this.mysqlComando.Parameters.Clear();
+            this.mysqlComando.CommandText = "SELECT * FROM " + tabela;
+
+            if (Sigla != null)
+            {
+                this.mysqlComando.CommandText += " WHERE SIGLA = @SIGLA";
+                this.mysqlComando.Parameters.AddWithValue("@SIGLA", Sigla);
+            }
 
             try
             {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqldatareader = mysqlComando.ExecuteReader();
+                this.mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
+                this.mysqldatareader = mysqlComando.ExecuteReader();
 
-                    
-                while (mysqldatareader.Read())
-                {
-                    produtoFinanceiro.Add(new AcaoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
-                    
-                }
             }
             catch (Exception ex)
             {
-
                 MessageBox.Show(ex.Message);
             }
-            finally
-            {
-                dbconnection.FecharConexao();
-            }
 
-            mysqlComando.CommandText = "SELECT * FROM produto_fundo";
-
-            try
-            {
-                mysqlComando.Connection = (MySqlConnection)dbconnection.AbrirConexao();
-                mysqldatareader = mysqlComando.ExecuteReader();
-
-
-                while (mysqldatareader.Read())
-                {
-                    produtoFinanceiro.Add(new FundoModel(mysqldatareader.GetInt32(0), mysqldatareader.GetString(1), mysqldatareader.GetString(2), mysqldatareader.GetString(3)));
-
-                }
-            }
-            catch (Exception ex)
-            {
-
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                dbconnection.FecharConexao();
-            }
+            return this.mysqldatareader;
         }
     }
 }

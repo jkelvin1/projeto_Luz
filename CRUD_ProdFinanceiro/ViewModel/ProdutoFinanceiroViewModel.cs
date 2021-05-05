@@ -15,9 +15,21 @@ namespace CRUD_ProdFinanceiro.ViewModel
     public class ProdutoFinanceiroViewModel
     {
         private string opcaoTabela;
-        public MySqlCRUD mysqlcrud;
-        public SqLiteCRUD sqlitecrud;
-         
+        private MySqlCRUD mysqlcrud;
+        //private SqLiteCRUD sqlitecrud;
+        public ProdutoFinanceiroViewModel()
+        {
+            ProdutoFinanceiro = new ObservableCollection<IProdutoFinanceiro>();
+
+            this.mysqlcrud = new MySqlCRUD();
+            //sqlitecrud = new SqLiteCRUD();
+
+            this.mysqlcrud.ReadAll(ProdutoFinanceiro);
+
+
+            this.MyCommands();
+        }
+
         public ObservableCollection<IProdutoFinanceiro> ProdutoFinanceiro { get; set; }
         
         public int Id { get; set; }
@@ -33,19 +45,7 @@ namespace CRUD_ProdFinanceiro.ViewModel
         public ICommand DeleteProdutoFinanceiroCommand { get; private set; }
         
 
-        public ProdutoFinanceiroViewModel()
-        {
-            ProdutoFinanceiro = new ObservableCollection<IProdutoFinanceiro>();
-
-            mysqlcrud = new MySqlCRUD();
-            sqlitecrud = new SqLiteCRUD();
-
-            mysqlcrud.ReadAll(ProdutoFinanceiro);
-
-
-            this.MyCommands();
-        }
-
+        #region Comandos
         private void MyCommands()
         {
             CreateProdutoFinanceiroCommand = new RelayCommand(CreateProdutoFinanceiro, CreateProdutoFinanceiroCanUse);
@@ -53,66 +53,83 @@ namespace CRUD_ProdFinanceiro.ViewModel
             UpdateProdutoFinanceiroCommand = new RelayCommand(UpdateProdutoFinanceiro, UpdateProdutoFinanceiroCanUse);
             DeleteProdutoFinanceiroCommand = new RelayCommand(DeleteProdutoFinanceiro, DeleteProdutoFinanceiroCanUse);
         }
-        
 
-        public void CreateProdutoFinanceiro(object objRelayCommand)
+        
+        private void CreateProdutoFinanceiro(object objRelayCommand)
         {
             if (Tipo == "Ação")
             {
-                opcaoTabela = "produto_acao";
+                this.opcaoTabela = "produto_acao";
                 
             }
             else if (Tipo == "Fundo")
             {
-                opcaoTabela = "produto_fundo";
+                this.opcaoTabela = "produto_fundo";
             }
-            mysqlcrud.Create(Sigla, Nome, Setor, opcaoTabela, ProdutoFinanceiro);
+
+            int Id =  mysqlcrud.Create(Sigla, Nome, Setor, opcaoTabela);
+            
+            if ( Id != 0 )
+            {
+                if (this.opcaoTabela == "produto_acao")
+                {
+                    ProdutoFinanceiro.Add(new AcaoModel(Id, Sigla, Nome, Setor));
+
+                }
+                else if (this.opcaoTabela == "produto_fundo")
+                {
+                    ProdutoFinanceiro.Add(new FundoModel(Id, Sigla, Nome, Setor));
+                }
+            }
+
             //sqlitecrud.Create(Sigla, Nome, Setor, opcaoTabela, ProdutoFinanceiro);
 
-            
+
         }
-        public bool CreateProdutoFinanceiroCanUse(object objRelayCommand)
+        private bool CreateProdutoFinanceiroCanUse(object objRelayCommand)
         {
             return true;
         }
 
-        public void ReadProdutoFinanceiro(object objRelayCommand)
+        private void ReadProdutoFinanceiro(object objRelayCommand)
         {
             ProdutoFinanceiro.Clear();
-            mysqlcrud.Read(Sigla, ProdutoFinanceiro);
-            if(Sigla == "")
+
+            if (Sigla == "")
             {
                 mysqlcrud.ReadAll(ProdutoFinanceiro);
             }
+
+            mysqlcrud.Read(Sigla, ProdutoFinanceiro);
         }
-        public bool ReadProdutoFinanceiroCanUse(object objRelayCommand)
+        private bool ReadProdutoFinanceiroCanUse(object objRelayCommand)
         {
             return true;
         }
 
-        public void UpdateProdutoFinanceiro(object objRelayCommand)
+        private void UpdateProdutoFinanceiro(object objRelayCommand)
         {
             IProdutoFinanceiro itemSelecionado = (IProdutoFinanceiro)objRelayCommand;
             
             if (itemSelecionado.Tipo == "Ação")
             {
-                opcaoTabela = "produto_acao";
+                this.opcaoTabela = "produto_acao";
             }
             else if (itemSelecionado.Tipo == "Fundo")
             {
-                opcaoTabela = "produto_fundo";
+                this.opcaoTabela = "produto_fundo";
             }
             mysqlcrud.Update(itemSelecionado.Id, Sigla, Nome, Setor, opcaoTabela);
             
         }
-        public bool UpdateProdutoFinanceiroCanUse(object objRelayCommand)
+        private bool UpdateProdutoFinanceiroCanUse(object objRelayCommand)
         {
             if (objRelayCommand == null)
                 return false;
             return true;
         }
 
-        public void DeleteProdutoFinanceiro(object objRelayCommand)
+        private void DeleteProdutoFinanceiro(object objRelayCommand)
         {
             IProdutoFinanceiro itemSelecionado = (IProdutoFinanceiro)objRelayCommand;
 
@@ -124,14 +141,19 @@ namespace CRUD_ProdFinanceiro.ViewModel
             {
                 opcaoTabela = "produto_fundo";
             }
-
-            mysqlcrud.Delete(itemSelecionado.Id, opcaoTabela, itemSelecionado, ProdutoFinanceiro);
+       
+            if (mysqlcrud.Delete(itemSelecionado.Id, opcaoTabela))
+            {
+                ProdutoFinanceiro.Remove(itemSelecionado);
+            }
         }
-        public bool DeleteProdutoFinanceiroCanUse(object objRelayCommand)
+        private bool DeleteProdutoFinanceiroCanUse(object objRelayCommand)
         {
             if (objRelayCommand == null)
                 return false;
             return true;
         }
+
+        #endregion
     }
 }
